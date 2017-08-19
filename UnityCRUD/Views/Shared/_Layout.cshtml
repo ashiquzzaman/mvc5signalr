@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/singalr")
+    <script src="/signalr/hubs"></script>
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            @Html.ActionLink("Application name", "Index", "Home", new {area = ""}, new {@class = "navbar-brand"})
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                <li>@Html.ActionLink("Department", "Index", "Departments")</li>
+                <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+            </ul>
+            @Html.Partial("_LoginPartial")
+        </div>
+    </div>
+</div>
+<div class="container body-content">
+    @RenderBody()
+    <hr/>
+    <footer>
+        <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+    </footer>
+</div>
+
+
+@Scripts.Render("~/bundles/bootstrap")
+@RenderSection("scripts", required: false)
+<script>
+    $(function() {
+        // Reference the hub.
+        var emp = $.connection.employeeHub;
+
+        // Notify while anyChanges.
+        emp.client.refreshDepartment = function () {
+            getAll();
+        };
+
+        // Start the connection.
+        $.connection.hub.start().done(function () {
+            getAll();
+        }).fail(function () { console.log('Could not connect'); });;
+    });
+
+    function getAll() {
+        var model = $('#dept');
+        $.ajax(
+            {
+                url: '/Departments/List',
+                contentType: 'application/html ; charset:utf-8',
+                type: 'GET',
+                dataType: 'html'
+            })
+            .success(function(result) {
+                model.empty().append(result);
+            })
+            .error(function(e) {
+                alert(e);
+            });
+    }
+</script>
+</body>
+</html>
